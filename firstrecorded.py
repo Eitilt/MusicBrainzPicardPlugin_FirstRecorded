@@ -18,6 +18,7 @@ from picard.metadata import (
     )
 
 from datetime import datetime
+from calendar import calendar
 
 
 
@@ -47,8 +48,13 @@ class MyLookup():
             try:
                 log.debug("\tDate=%s", release.date[0].text)
 
+                calcmonthlength = False
+
                 if len(release.date[0].text) == 10:
                     dtstrmin=dtstrmax=release.date[0].text
+                elif len(release.date[0].text) == 7:
+                    dtstrmin=dtstrmax=release.date[0].text + "-01"
+                    calcmonthlength = True
                 elif len(release.date[0].text) == 4:
                     dtstrmin=release.date[0].text + "-01-01"
                     dtstrmax=release.date[0].text + "-12-31"
@@ -60,6 +66,8 @@ class MyLookup():
             try:
                 dtobjmin=datetime.strptime(dtstrmin, '%Y-%m-%d')
                 dtobjmax=datetime.strptime(dtstrmax, '%Y-%m-%d')
+                if calcmonthlength:
+                    dtobjmax.day = calendar.monthrange(dtobjmax.year, dtobjmax.month)[1]
             except:
                 log.info("ERROR: Unknown date format dtstrmin='%s' dtstrmax='%s' for Recording ID: %s", dtstrmin, dtstrmax, self.track_node.recording[0].id)
                 continue
@@ -88,7 +96,7 @@ class MyLookup():
 
 
 def first_year_track(album, metadata, track_node, release_node):
-    mylookup=MyLookup(album, metadata,track_node, release_node)   
+    mylookup=MyLookup(album, metadata, track_node, release_node)   
     mylookup.mydolookup()
 
 register_track_metadata_processor(first_year_track)
