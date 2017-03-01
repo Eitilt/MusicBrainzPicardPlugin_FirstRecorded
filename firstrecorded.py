@@ -17,8 +17,10 @@ from picard.metadata import (
     register_album_metadata_processor,
     )
 
-from datetime import datetime
-from calendar import calendar
+from datetime import (
+    datetime,
+    timedelta,
+    )
 
 
 
@@ -67,7 +69,11 @@ class MyLookup():
                 dtobjmin=datetime.strptime(dtstrmin, '%Y-%m-%d')
                 dtobjmax=datetime.strptime(dtstrmax, '%Y-%m-%d')
                 if calcmonthlength:
-                    dtobjmax.day = calendar.monthrange(dtobjmax.year, dtobjmax.month)[1]
+                    if dtobjmax.month == 12:
+                        dtobjmax.replace(day=31)
+                    else:
+                        dtobjmax.replace(month=dtobjmax.month+1)
+                        dtobjmax -= timedelta(days=1)
             except:
                 log.info("ERROR: Unknown date format dtstrmin='%s' dtstrmax='%s' for Recording ID: %s", dtstrmin, dtstrmax, self.track_node.recording[0].id)
                 continue
